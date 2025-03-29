@@ -21,3 +21,29 @@ class User {
 }
 
 export const userModel:User =  new User();
+
+export class UserModel {
+  private name: string = 'No Name';
+
+  constructor(name: string) {
+    this.name = name;
+  }
+  getName() {
+    return this.name;
+  }
+
+  setName(name: string) {
+    this.name = name;
+    this.update();
+  }
+
+  update() {
+    store.dispatch(userSlice.actions.update(this.getState()));
+  }
+
+  getState() {
+    return {
+      name: this.getName(),
+    }
+  }
+}
