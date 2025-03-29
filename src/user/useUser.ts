@@ -1,43 +1,48 @@
-
-import { useSelector } from "react-redux";
-import { RootState } from "../store";
-import { UserModel, userModel } from "./userModel";
 import { useRef } from "react";
-
+import { useDispatch, useSelector } from "react-redux";
+import { createSlice } from "@reduxjs/toolkit"
+import { RootState } from "../store";
+import { User } from "./User";
 
 
 export const useUser = () => {
-  const userName = useSelector((state: RootState) => state.user.name);
-
-  return {
-    userName: userName,
-    setUserName: (name: string) => userModel.setName(name),
-  }
-}
-
-export const useUser2 = () => {
-  const userName = useSelector((state: RootState) => state.user.name);
-  const userInstanceRef = useRef<UserModel | null>(null);
-
+  const user = useSelector((state: RootState) => state.user);
+  const userInstanceRef = useRef<User | null>(null);
+  const dispatch = useDispatch();
+  
   const initUserInstance = () => {
     if (!userInstanceRef.current) {
-      userInstanceRef.current = new UserModel('My Name');
-      userInstanceRef.current.update();
+      userInstanceRef.current = new User();
+      update();
     }
   }
 
   const setUserName = (name: string) => {
-    if (userInstanceRef.current) {
-      userInstanceRef.current.setName(name);
-    } else {
-      userInstanceRef.current = new UserModel(name);
-      userInstanceRef.current.setName(name);
+    if (!userInstanceRef.current) {
+      userInstanceRef.current = new User();
     }
+    
+    userInstanceRef.current.setName(name);
+    update();
+  }
+
+  const update = () => {
+    dispatch(userSlice.actions.update(userInstanceRef.current?.getState()));
   }
 
   return {
     initUserInstance,
-    userName: userName,
+    userName: user.name,
     setUserName: (name: string) => setUserName(name),
   }
 }
+
+export const userSlice = createSlice({
+  name: 'user',
+  initialState: {
+    name: ''
+  } as IUserState,
+  reducers: {
+    update: (state, action) => action.payload
+  },
+})
